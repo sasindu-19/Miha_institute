@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="admin.css">
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="../Firebase/firebaseConfig.js"></script>
+    <script src="admin.js"></script>
+
+    <script>
+        window.onload = function () {
+            // Check if user is logged in and is Admin
+            auth.onAuthStateChanged(async (user) => {
+                if (user) {
+                    try {
+                        const doc = await db.collection("users").doc(user.uid).get();
+                        if (!doc.exists || doc.data().role !== "admin") {
+                            window.location.href = "../index.html";
+                        }
+                    } catch (error) {
+                        window.location.href = "../index.html";
+                    }
+                } else {
+                    window.location.href = "../index.html";
+                }
+            });
+        };
+    </script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <div class="logo">🍽️ Food Admin</div>
+            <div class="menu-item active" data-section="dashboard">📊 Dashboard</div>
+            <div class="menu-item" data-section="foods">🍔 Foods</div>
+            <div class="menu-item" data-section="orders">📦 Orders</div>
+            <div class="menu-item" data-section="categories">📂 Categories</div>
+        </div>
+
+        <div class="main-content">
+            <div class="header">
+                <h1>Welcome, Admin!</h1>
+                <button class="logout-btn" onclick="handleLogout()">Logout</button>
+            </div>
+
+            <div class="content-section active" id="dashboard">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total Foods</h3>
+                        <div class="value" id="totalFoods">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Orders</h3>
+                        <div class="value" id="totalOrders">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Pending Orders</h3>
+                        <div class="value" id="pendingOrders">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Revenue</h3>
+                        <div class="value" id="totalRevenue">Rs. 0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section" id="foods">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Manage Foods</h2>
+                        <button class="add-btn" onclick="openFoodModal()">+ Add New Food</button>
+                    </div>
+                    <div id="foodGrid" class="food-grid"></div>
+                </div>
+            </div>
+
+            <div class="content-section" id="orders">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Manage Orders</h2>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Items</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTableBody">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="content-section" id="categories">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Manage Categories</h2>
+                        <button class="add-btn" onclick="openCategoryModal()">+ Add Category</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Category Name</th>
+                                <th>Items Count</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="categoriesTableBody">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal" id="foodModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="foodModalTitle">Add New Menu Item</h2>
+                    <button class="close-btn" onclick="closeFoodModal()">&times;</button>
+                </div>
+                <form id="foodForm">
+                    <div class="form-group">
+                        <label>Item Image</label>
+                        <div class="image-upload-box" onclick="document.getElementById('itemImageInput').click()">
+                            <span style="font-size: 24px; color: #888;">☁️</span> 
+                            <p>Click to upload image</p>
+                            <input type="file" id="itemImageInput" accept="image/*" style="display: none;">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group half-width">
+                            <label>Item Name *</label>
+                            <input type="text" id="foodName" required>
+                        </div>
+                        <div class="form-group half-width">
+                            <label>Price (Rs.) *</label>
+                            <input type="number" id="foodPrice" required min="0">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="foodDescription" rows="3"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group half-width">
+                            <label>Category *</label>
+                            <select id="foodCategory" required>
+                                <option value="">Select Category</option>
+                            </select>
+                        </div>
+                        <div class="form-group half-width">
+                            <label>Subcategory</label>
+                            <input type="text" id="foodSubcategory">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group half-width">
+                            <label>Allergens</label>
+                            <input type="text" id="foodAllergens">
+                        </div>
+                        <div class="form-group half-width">
+                            <label>Availability</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="availability" value="available" checked> Available</label>
+                                <label><input type="radio" name="availability" value="unavailable"> Unavailable</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-cancel" onclick="closeFoodModal()">Cancel</button>
+                        <button type="submit" class="btn-submit">Save Item</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="modal" id="categoryModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Add New Category</h2>
+                    <button class="close-btn" onclick="closeCategoryModal()">&times;</button>
+                </div>
+                <form id="categoryForm">
+                    <div class="form-group">
+                        <label>Category Name *</label>
+                        <input type="text" id="categoryName" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-cancel" onclick="closeCategoryModal()">Cancel</button>
+                        <button type="submit" class="btn-submit">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

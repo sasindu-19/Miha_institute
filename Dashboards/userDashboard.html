@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="../Firebase/firebaseConfig.js"></script>
+    <script>
+        window.onload = function () {
+
+            auth.onAuthStateChanged(async (user) => {
+                if (user) {
+                    try {
+                        const doc = await db.collection("users").doc(user.uid).get();
+
+                        if (doc.exists && doc.data().role === "user") {
+                        } else {
+                            window.location.href = "../index.html";
+                        }
+                    } catch (error) {
+                        window.location.href = "../index.html";
+                    }
+                } else {
+                    window.location.href = "../index.html";
+                }
+            });
+
+        };
+    </script>
+</head>
+<body>
+    <h2>This is User Dashboard</h2>
+
+
+</body>
+</html>
