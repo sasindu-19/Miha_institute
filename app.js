@@ -16,7 +16,7 @@ async function loginUser(){
         if(role == "admin"){
             window.location.href = "Dashboards/adminDashboard.html";
         }else{
-            window.location.href = "Dashboards/userDashboard.html";
+            window.location.href = "Dashboards/User/index.html";
         }
     }catch(error){
         alert(error.message);
