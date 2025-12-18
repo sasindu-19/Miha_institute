@@ -324,7 +324,7 @@ window.updateOrderStatus = async function(orderId) {
 window.handleLogout = function() {
     if (confirm('Logout?')) {
         auth.signOut().then(() => {
-            window.location.href = '../index.html';
+            window.location.href = '../../index.html';
         });
     }
 };

@@ -4,772 +4,334 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Foodie Hub - User Dashboard</title>
+    <link rel="stylesheet" href="user.css"> 
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --primary: #ff6b35;
-            --primary-dark: #e55a2b;
-            --secondary: #4ecdc4;
-            --dark: #1a1a2e;
-            --dark-light: #16213e;
-            --text: #ffffff;
-            --text-muted: #b0b0b0;
-            --success: #00d9a5;
-            --danger: #ff4757;
-            --warning: #ffa502;
-            --info: #3498db;
-        }
-
+        /* Dashboard Specific Styles */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            color: var(--text);
+            background-color: var(--bg-body, #fafafa);
+            display: flex;
+            flex-direction: column;
             min-height: 100vh;
-            overflow-x: hidden;
+            margin: 0;
         }
 
-        /* Animated Background */
-        .bg-animation {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            opacity: 0.1;
-            pointer-events: none;
-        }
-
-        .bg-circle {
-            position: absolute;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            animation: float 20s infinite ease-in-out;
-        }
-
-        .bg-circle:nth-child(1) {
-            width: 280px;
-            height: 280px;
-            top: 10%;
-            left: 8%;
-            animation-delay: 0s;
-        }
-
-        .bg-circle:nth-child(2) {
-            width: 200px;
-            height: 200px;
-            top: 55%;
-            right: 12%;
-            animation-delay: 3s;
-        }
-
-        .bg-circle:nth-child(3) {
-            width: 150px;
-            height: 150px;
-            bottom: 12%;
-            left: 48%;
-            animation-delay: 6s;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(30px, -30px) scale(1.1); }
-            66% { transform: translate(-20px, 20px) scale(0.9); }
-        }
-
-        /* Header */
-        header {
-            position: relative;
-            z-index: 100;
-            background: rgba(26, 26, 46, 0.8);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 1.2rem 0;
-            position: sticky;
-            top: 0;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 2rem;
-        }
-
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 1.8rem;
-            font-weight: bold;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-decoration: none;
-            transition: transform 0.3s;
-        }
-
-        .logo:hover {
-            transform: scale(1.05);
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-        }
-
-        .nav-links a {
-            color: var(--text);
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s;
-            position: relative;
-        }
-
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            transition: width 0.3s;
-        }
-
-        .nav-links a:hover::after,
-        .nav-links a.active::after {
-            width: 100%;
-        }
-
-        .header-buttons {
-            display: flex;
-            gap: 1rem;
-        }
-
-        /* Buttons */
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 0.95rem;
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 2px solid var(--primary);
-            color: var(--text);
-        }
-
-        .btn-outline:hover {
-            background: var(--primary);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(255, 107, 53, 0.3);
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), #ff8c5a);
-            color: white;
-            border: none;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(255, 107, 53, 0.4);
-        }
-
-        /* Main Content */
         main {
-            position: relative;
-            z-index: 1;
-            padding: 3rem 0 5rem;
+            flex: 1;
+            padding-bottom: 3rem;
+            margin: 20px;
         }
 
-        h1 {
-            font-size: 2.8rem;
-            margin-bottom: 2.5rem;
-            text-align: center;
-            background: linear-gradient(135deg, #ffffff, var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        /* Stats Cards */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1.5rem;
-            margin-bottom: 3rem;
+            margin-bottom: 2.5rem;
         }
 
         .stat-card {
-            background: rgba(255, 255, 255, 0.05);
+            background: white;
+            border: 1px solid var(--primary, #ff5722);
             border-radius: 20px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
             padding: 1.5rem;
             text-align: center;
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
-        }
-
-        .stat-icon {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
 
         .stat-value {
-            font-size: 2rem;
+            font-size: 1.8rem;
             font-weight: bold;
             color: var(--primary);
-            margin-bottom: 0.3rem;
         }
 
-        .stat-label {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-
-        /* Dashboard Layout */
+        /* Layout Structure */
         .dashboard-layout {
             display: grid;
             grid-template-columns: 280px 1fr;
             gap: 2rem;
-            align-items: start;
+            width: 100%;
         }
 
-        /* Sidebar */
+        /* Sidebar Styling */
         .dashboard-sidebar {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 24px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: white;
+            border: 1px solid #eee;
+            border-radius: 20px;
             padding: 2rem;
+            height: fit-content;
             position: sticky;
             top: 100px;
         }
 
-        .user-profile {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
         .user-avatar {
-            width: 100px;
-            height: 100px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
-            object-fit: cover;
-            margin-bottom: 1rem;
             border: 3px solid var(--primary);
-            box-shadow: 0 10px 30px rgba(255, 107, 53, 0.3);
-        }
-
-        .user-profile h3 {
-            font-size: 1.3rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .user-profile p {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-
-        .dashboard-nav {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .dashboard-nav a {
-            padding: 1rem 1.5rem;
-            border-radius: 12px;
-            color: var(--text);
-            text-decoration: none;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-        }
-
-        .dashboard-nav a:hover {
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .dashboard-nav a.active {
-            background: linear-gradient(135deg, var(--primary), #ff8c5a);
-            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
-        }
-
-        .btn-logout {
-            width: 100%;
-            background: transparent;
-            border: 2px solid var(--danger);
-            color: var(--danger);
-        }
-
-        .btn-logout:hover {
-            background: var(--danger);
-            color: white;
-        }
-
-        /* Orders Section */
-        .dashboard-main h2 {
-            font-size: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .order-card {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 2rem;
-            margin-bottom: 1.5rem;
-            transition: all 0.3s;
-        }
-
-        .order-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            border-color: var(--primary);
-        }
-
-        .order-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             margin-bottom: 1rem;
+            object-fit: cover;
         }
 
-        .order-header strong {
-            font-size: 1.2rem;
+        /* Tab Switching Styles */
+        .tab-content {
+            display: none; /* Default hide */
+            animation: fadeIn 0.4s ease-in-out;
         }
 
-        .status-badge {
-            padding: 0.5rem 1.2rem;
+        .tab-content.active {
+            display: block; /* Show active */
+        }
+
+        .sidebar-btn {
+            text-align: left;
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            border: none;
+            background: transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: 0.3s;
+        }
+
+        .sidebar-btn.active {
+            background: var(--primary, #ff5722) !important;
+            color: white !important;
+        }
+
+        .sidebar-btn:hover:not(.active) {
+            background: #f0f0f0;
+        }
+
+        /* Order Cards & Form UI */
+        .order-card {
+            background: white;
+            border: 1px solid #eee;
             border-radius: 20px;
-            font-size: 0.85rem;
+            padding: 1.5rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 8px;
+            background: #eee;
+            border-radius: 10px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 0%; 
+            transition: width 1s ease-in-out;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
             font-weight: 600;
         }
 
-        .status-delivered {
-            background: var(--success);
-            color: white;
-        }
-
-        .status-accepted {
-            background: var(--info);
-            color: white;
-        }
-
-        .status-pending {
-            background: var(--warning);
-            color: white;
-        }
-
-        .status-cancelled {
-            background: var(--danger);
-            color: white;
-        }
-
-        .order-details {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            color: var(--text-muted);
-        }
-
-        .order-price {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: var(--primary);
-        }
-
-        /* Progress Bar */
-        .progress-bar-container {
+        .form-group input {
             width: 100%;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            overflow: hidden;
-            margin-bottom: 1rem;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
         }
 
-        .progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            border-radius: 10px;
-            transition: width 1s ease;
-            box-shadow: 0 0 10px rgba(78, 205, 196, 0.5);
-        }
-
-        .order-items {
-            display: flex;
-            gap: 1rem;
-            margin-top: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .order-item-chip {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .order-actions {
-            display: flex;
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .btn-small {
-            padding: 0.6rem 1.2rem;
-            font-size: 0.85rem;
-        }
-
-        /* Footer */
         footer {
-            position: relative;
-            z-index: 1;
-            background: rgba(26, 26, 46, 0.8);
-            backdrop-filter: blur(10px);
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 2rem 0;
+            padding: 2rem;
             text-align: center;
+            background: #fff;
+            border-top: 1px solid #eee;
+            margin-top: auto;
         }
 
-        /* Toast */
-        #toast-container {
-            position: fixed;
-            top: 100px;
-            right: 20px;
-            z-index: 1000;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .toast {
-            background: linear-gradient(135deg, var(--success), var(--secondary));
-            color: white;
-            padding: 1rem 1.5rem;
-            border-radius: 12px;
-            margin-bottom: 1rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            animation: slideIn 0.4s, fadeOut 0.4s 2.6s forwards;
-        }
-
-        .toast.error {
-            background: linear-gradient(135deg, var(--danger), #ff6b81);
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(100px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        @keyframes fadeOut {
-            to {
-                opacity: 0;
-                transform: translateX(100px);
-            }
-        }
-
-        /* Responsive */
         @media (max-width: 968px) {
-            .dashboard-layout {
-                grid-template-columns: 1fr;
-            }
-
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .nav-links {
-                display: none;
-            }
-        }
-
-        @media (max-width: 568px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
+            .dashboard-layout { grid-template-columns: 1fr; }
+            .dashboard-sidebar { position: static; margin-bottom: 2rem; }
         }
     </style>
 </head>
 <body>
-    <!-- Animated Background -->
-    <div class="bg-animation">
-        <div class="bg-circle"></div>
-        <div class="bg-circle"></div>
-        <div class="bg-circle"></div>
-    </div>
 
-    <!-- Header -->
-    <header>
-        <div class="container navbar">
-            <a href="#" class="logo">🍔 Foodie Hub</a>
-            
-            <nav class="nav-links">
+    <nav id="navbar">
+        <div class="nav-container">
+            <a href="index.html" style="text-decoration: none"><div class="logo">🍔 Foodie Hub</div></a>
+            <div class="nav-links">
                 <a href="index.html">Home</a>
+                <a href="index.html#categories">Menu</a>
                 <a href="cart.html">Cart</a>
                 <a href="dashboard.html" class="active">Dashboard</a>
-            </nav>
-
-            <div class="header-buttons">
-                <button class="btn btn-outline">Login</button>
-                <button class="btn btn-primary">Sign Up</button>
+            </div>
+            <div class="nav-cta">
+                <button class="btn btn-outline" onclick="logout()">Logout</button>
             </div>
         </div>
-    </header>
+    </nav>
 
-    <main class="container">
-        <h1>📊 Dashboard</h1>
+    <main class="container" Style="margin-top: 100px ;">
+        <h1 style="text-align: center; margin: 30px 0;">📊 User Dashboard</h1>
 
-        <!-- Stats Cards -->
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-icon">📦</div>
+                <div style="font-size: 2rem;">📦</div>
                 <div class="stat-value">24</div>
-                <div class="stat-label">Total Orders</div>
+                <div style="color: #666;">Total Orders</div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">⏳</div>
+                <div style="font-size: 2rem;">⏳</div>
                 <div class="stat-value">2</div>
-                <div class="stat-label">Pending Orders</div>
+                <div style="color: #666;">In Progress</div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">✅</div>
-                <div class="stat-value">22</div>
-                <div class="stat-label">Completed</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">💰</div>
+                <div style="font-size: 2rem;">💰</div>
                 <div class="stat-value">LKR 48.5K</div>
-                <div class="stat-label">Total Spent</div>
+                <div style="color: #666;">Total Spent</div>
             </div>
         </div>
 
         <div class="dashboard-layout">
-            <!-- Sidebar -->
             <aside class="dashboard-sidebar">
-                <div class="user-profile">
-                    <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&h=200&fit=crop" alt="User Avatar" class="user-avatar">
-                    <h3>Alex Johnson</h3>
-                    <p>alex.j@example.com</p>
+                <div style="text-align: center;">
+                    <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100" class="user-avatar" alt="User">
+                    <h3 id="display-name">Alex Johnson</h3>
+                    <p style="color:#666; font-size: 0.9rem;">alex.j@example.com</p>
                 </div>
-
-                <nav class="dashboard-nav">
-                    <a href="#" class="active">
-                        <span>📋</span> My Orders
-                    </a>
-                    <a href="#">
-                        <span>👤</span> Profile Settings
-                    </a>
-                    <a href="#">
-                        <span>📍</span> Saved Addresses
-                    </a>
-                    <a href="#">
-                        <span>❤️</span> Favorites
-                    </a>
-                    <a href="#">
-                        <span>🎫</span> Promo Codes
-                    </a>
-                </nav>
-
-                <button class="btn btn-logout" onclick="logout()">
-                    🚪 Logout
-                </button>
+                <hr style="margin: 1.5rem 0; opacity: 0.1;">
+                <div>
+                    <button class="sidebar-btn active" onclick="switchTab(event, 'orders-tab')">📋 My Orders</button>
+                    <button class="sidebar-btn" onclick="switchTab(event, 'profile-tab')">👤 Profile Settings</button>
+                    <button class="sidebar-btn" onclick="switchTab(event, 'address-tab')">📍 Saved Addresses</button>
+                </div>
             </aside>
 
-            <!-- Main Content -->
-            <section class="dashboard-main">
-                <h2>My Orders</h2>
+            <section class="dashboard-content">
+                
+                <div id="orders-tab" class="tab-content active">
+                    <h2 style="margin-bottom: 1.5rem;">Recent Orders</h2>
+                    
+                    <div class="order-card">
+                        <div style="display: flex; justify-content: space-between;">
+                            <strong>Order #FH-1002</strong>
+                            <span style="background: #3498db; color: white; padding: 3px 10px; border-radius: 20px; font-size: 0.8rem;">🚴 Out for Delivery</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div class="progress-fill" style="width: 75%;"></div>
+                        </div>
+                        <p style="color: #666; font-size: 0.9rem;">Pizza Margherita, Coke x2</p>
+                        <div style="margin-top: 10px; font-weight: bold; color: var(--primary);">LKR 1,800</div>
+                    </div>
 
-                <!-- Order 1: Delivered -->
-                <div class="order-card">
-                    <div class="order-header">
-                        <strong>Order #FH-1001</strong>
-                        <span class="status-badge status-delivered">✓ Delivered</span>
-                    </div>
-                    <div class="order-details">
-                        <span>📅 December 14, 2025</span>
-                        <span class="order-price">LKR 3,510</span>
-                    </div>
-                    <div class="progress-bar-container">
-                        <div class="progress-bar" style="width: 100%;"></div>
-                    </div>
-                    <div class="order-items">
-                        <span class="order-item-chip">🥗 Quinoa Bowl x1</span>
-                        <span class="order-item-chip">🍛 Biryani x2</span>
-                    </div>
-                    <div class="order-actions">
-                        <button class="btn btn-outline btn-small" onclick="viewOrder(1001)">View Details</button>
-                        <button class="btn btn-primary btn-small" onclick="reorder(1001)">Reorder</button>
+                    <div class="order-card">
+                        <div style="display: flex; justify-content: space-between;">
+                            <strong>Order #FH-1001</strong>
+                            <span style="background: #00d9a5; color: white; padding: 3px 10px; border-radius: 20px; font-size: 0.8rem;">✓ Delivered</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div class="progress-fill" style="width: 100%;"></div>
+                        </div>
+                        <p style="color: #666; font-size: 0.9rem;">Quinoa Bowl, Biryani x2</p>
+                        <div style="margin-top: 10px; font-weight: bold; color: var(--primary);">LKR 3,510</div>
                     </div>
                 </div>
 
-                <!-- Order 2: Out for Delivery -->
-                <div class="order-card">
-                    <div class="order-header">
-                        <strong>Order #FH-1002</strong>
-                        <span class="status-badge status-accepted">🚴 Out for Delivery</span>
-                    </div>
-                    <div class="order-details">
-                        <span>📅 December 15, 2025</span>
-                        <span class="order-price">LKR 1,800</span>
-                    </div>
-                    <div class="progress-bar-container">
-                        <div class="progress-bar" style="width: 75%;"></div>
-                    </div>
-                    <div class="order-items">
-                        <span class="order-item-chip">🍕 Margherita x1</span>
-                        <span class="order-item-chip">🥤 Coke x2</span>
-                    </div>
-                    <div class="order-actions">
-                        <button class="btn btn-primary btn-small" onclick="trackOrder(1002)">Track Order 📍</button>
-                        <button class="btn btn-outline btn-small" onclick="contactSupport(1002)">Contact Support</button>
+                <div id="profile-tab" class="tab-content">
+                    <h2 style="margin-bottom: 1.5rem;">👤 Profile Settings</h2>
+                    <div class="order-card">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" id="input-name" value="Alex Johnson">
+                        </div>
+                        <div class="form-group">
+                            <label>Email Address</label>
+                            <input type="email" value="alex.j@example.com" disabled style="background: #f9f9f9;">
+                        </div>
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="tel" value="077 123 4567">
+                        </div>
+                        <button class="btn btn-primary" onclick="saveProfile()">Save Changes</button>
                     </div>
                 </div>
 
-                <!-- Order 3: Preparing -->
-                <div class="order-card">
-                    <div class="order-header">
-                        <strong>Order #FH-1003</strong>
-                        <span class="status-badge status-pending">🔥 Preparing</span>
+                <div id="address-tab" class="tab-content">
+                    <h2 style="margin-bottom: 1.5rem;">📍 Saved Addresses</h2>
+                    <div class="order-card" style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong>Home</strong>
+                            <p style="color:#666; font-size: 0.9rem; margin-top: 5px;">No 123, Galle Road, Colombo 03.</p>
+                        </div>
+                        <button style="border:none; background:none; color:var(--primary); cursor:pointer; font-weight:bold;">Edit</button>
                     </div>
-                    <div class="order-details">
-                        <span>📅 December 15, 2025</span>
-                        <span class="order-price">LKR 950</span>
-                    </div>
-                    <div class="progress-bar-container">
-                        <div class="progress-bar" style="width: 40%;"></div>
-                    </div>
-                    <div class="order-items">
-                        <span class="order-item-chip">🍔 Classic Burger x1</span>
-                        <span class="order-item-chip">🍟 French Fries x1</span>
-                    </div>
-                    <div class="order-actions">
-                        <button class="btn btn-outline btn-small" onclick="cancelOrder(1003)">Cancel Order</button>
-                    </div>
+                    <button class="btn btn-outline" style="width:100%; border-style: dashed;">+ Add New Address</button>
                 </div>
 
-                <!-- Order 4: Cancelled -->
-                <div class="order-card">
-                    <div class="order-header">
-                        <strong>Order #FH-1000</strong>
-                        <span class="status-badge status-cancelled">✕ Cancelled</span>
-                    </div>
-                    <div class="order-details">
-                        <span>📅 December 13, 2025</span>
-                        <span class="order-price">LKR 2,100</span>
-                    </div>
-                    <div class="progress-bar-container">
-                        <div class="progress-bar" style="width: 10%; background: var(--danger);"></div>
-                    </div>
-                    <div class="order-items">
-                        <span class="order-item-chip">🍝 Alfredo Pasta x2</span>
-                    </div>
-                    <div class="order-actions">
-                        <button class="btn btn-primary btn-small" onclick="reorder(1000)">Reorder</button>
-                    </div>
-                </div>
             </section>
         </div>
     </main>
 
-    <!-- Footer -->
     <footer>
-        <div class="container">
-            <p>&copy; 2025 Foodie Hub. All rights reserved. Made with ❤️</p>
-        </div>
+        <p>&copy; 2025 Foodie Hub. Made with ❤️</p>
     </footer>
 
-    <!-- Toast Container -->
-    <div id="toast-container"></div>
-
     <script>
-        function showToast(message, type = 'success') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.textContent = message;
-            container.appendChild(toast);
+        function switchTab(event, tabId) {
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
 
-            setTimeout(() => {
-                toast.remove();
-            }, 3000);
-        }
+            const buttons = document.querySelectorAll('.sidebar-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
 
-        function logout() {
-            showToast('👋 Logging out...');
-            setTimeout(() => {
-                showToast('✅ Logged out successfully!');
-            }, 1000);
-        }
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
 
-        function viewOrder(orderId) {
-            showToast(`📋 Viewing order #FH-${orderId}`);
-        }
-
-        function reorder(orderId) {
-            showToast(`🔄 Adding order #FH-${orderId} items to cart`);
-        }
-
-        function trackOrder(orderId) {
-            showToast(`📍 Tracking order #FH-${orderId}`);
-            setTimeout(() => {
-                alert('🚴 Your order is on the way!\n\nDriver: John Doe\nETA: 15 minutes\nPhone: +94 77 123 4567');
-            }, 500);
-        }
-
-        function contactSupport(orderId) {
-            showToast(`📞 Opening support chat for order #FH-${orderId}`);
-        }
-
-        function cancelOrder(orderId) {
-            if (confirm('Are you sure you want to cancel this order?')) {
-                showToast(`✕ Order #FH-${orderId} cancelled`, 'error');
-                // In a real app, this would update the order status
+            if(tabId === 'orders-tab') {
+                animateBars();
             }
         }
 
-        // Animate progress bars on load
-        window.addEventListener('load', () => {
-            const progressBars = document.querySelectorAll('.progress-bar');
-            progressBars.forEach(bar => {
-                const width = bar.style.width;
-                bar.style.width = '0';
+        // Progress Bar Animation
+        function animateBars() {
+            const fills = document.querySelectorAll('.progress-fill');
+            fills.forEach(fill => {
+                const target = fill.style.width;
+                fill.style.width = '0';
                 setTimeout(() => {
-                    bar.style.width = width;
-                }, 300);
+                    fill.style.width = target;
+                }, 100);
             });
-        });
+        }
+
+        // Simple Profile Save Simulation
+        function saveProfile() {
+            const newName = document.getElementById('input-name').value;
+            document.getElementById('display-name').innerText = newName;
+            alert("Profile updated successfully! ✅");
+        }
+
+        function logout() {
+            if(confirm("Are you sure you want to logout?")) {
+                alert("Logged out!");
+            }
+        }
+
+        // Initial Animation
+        window.onload = animateBars;
     </script>
 </body>
 </html>

@@ -4,805 +4,93 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Foodie Hub - Checkout</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="../../Firebase/firebaseConfig.js"></script>
+    <script src="user.js"></script>
+    <link rel="stylesheet" href="user.css"> 
+
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --primary: #ff6b35;
-            --primary-dark: #e55a2b;
-            --secondary: #4ecdc4;
-            --dark: #1a1a2e;
-            --dark-light: #16213e;
-            --text: #ffffff;
-            --text-muted: #b0b0b0;
-            --success: #00d9a5;
-            --danger: #ff4757;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            color: var(--text);
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        /* Animated Background */
-        .bg-animation {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            opacity: 0.1;
-            pointer-events: none;
-        }
-
-        .bg-circle {
-            position: absolute;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            animation: float 20s infinite ease-in-out;
-        }
-
-        .bg-circle:nth-child(1) {
-            width: 280px;
-            height: 280px;
-            top: 12%;
-            left: 5%;
-            animation-delay: 0s;
-        }
-
-        .bg-circle:nth-child(2) {
-            width: 200px;
-            height: 200px;
-            top: 50%;
-            right: 8%;
-            animation-delay: 3s;
-        }
-
-        .bg-circle:nth-child(3) {
-            width: 180px;
-            height: 180px;
-            bottom: 15%;
-            left: 50%;
-            animation-delay: 6s;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(30px, -30px) scale(1.1); }
-            66% { transform: translate(-20px, 20px) scale(0.9); }
-        }
-
-        /* Header */
-        header {
-            position: relative;
-            z-index: 100;
-            background: rgba(26, 26, 46, 0.8);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 1.2rem 0;
-            position: sticky;
-            top: 0;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 2rem;
-        }
-
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 1.8rem;
-            font-weight: bold;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-decoration: none;
-            transition: transform 0.3s;
-        }
-
-        .logo:hover {
-            transform: scale(1.05);
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-        }
-
-        .nav-links a {
-            color: var(--text);
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s;
-            position: relative;
-        }
-
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            transition: width 0.3s;
-        }
-
-        .nav-links a:hover::after {
-            width: 100%;
-        }
-
-        .header-buttons {
-            display: flex;
-            gap: 1rem;
-        }
-
-        /* Buttons */
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 0.95rem;
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 2px solid var(--primary);
-            color: var(--text);
-        }
-
-        .btn-outline:hover {
-            background: var(--primary);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(255, 107, 53, 0.3);
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), #ff8c5a);
-            color: white;
-            border: none;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(255, 107, 53, 0.4);
-        }
-
-        /* Main Content */
-        main {
-            position: relative;
-            z-index: 1;
-            padding: 3rem 0 5rem;
-        }
-
-        h1 {
-            font-size: 2.8rem;
-            margin-bottom: 2rem;
-            text-align: center;
-            background: linear-gradient(135deg, #ffffff, var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        /* Progress Steps */
-        .checkout-progress {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 3rem;
-            gap: 1rem;
-        }
-
-        .progress-step {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .step-circle {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            transition: all 0.3s;
-        }
-
-        .step-circle.active {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border-color: transparent;
-            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.4);
-        }
-
-        .step-label {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-        }
-
-        .step-label.active {
-            color: var(--text);
-            font-weight: 600;
-        }
-
-        .step-divider {
-            width: 50px;
-            height: 2px;
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        /* Checkout Layout */
-        .checkout-layout {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 2rem;
-            align-items: start;
-        }
-
-        /* Form Section */
-        .form-section {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 24px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 2rem;
-        }
-
-        .form-section h2 {
-            font-size: 1.8rem;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: var(--text);
-        }
-
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-            padding: 1rem;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text);
-            font-size: 0.95rem;
-            transition: all 0.3s;
-        }
-
-        .form-group input:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        /* Payment Methods */
-        .payment-methods {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .payment-card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 1.5rem;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-align: center;
-        }
-
-        .payment-card:hover {
-            border-color: var(--primary);
-            transform: translateY(-3px);
-        }
-
-        .payment-card.selected {
-            background: linear-gradient(135deg, rgba(255, 107, 53, 0.2), rgba(78, 205, 196, 0.2));
-            border-color: var(--primary);
-            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
-        }
-
-        .payment-card.disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .payment-icon {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .payment-name {
-            font-weight: 600;
-            margin-bottom: 0.3rem;
-        }
-
-        .payment-desc {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        /* Order Summary */
-        .order-summary {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 24px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 2rem;
-            position: sticky;
-            top: 100px;
-        }
-
-        .order-summary h2 {
-            font-size: 1.8rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .order-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .order-item:last-child {
-            border-bottom: none;
-        }
-
-        .item-info {
-            flex: 1;
-        }
-
-        .item-name {
-            font-weight: 600;
-            margin-bottom: 0.3rem;
-        }
-
-        .item-qty {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        .item-price {
-            font-weight: 600;
-            color: var(--primary);
-        }
-
-        .summary-divider {
-            height: 1px;
-            background: rgba(255, 255, 255, 0.1);
-            margin: 1.5rem 0;
-        }
-
-        .summary-line {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.75rem 0;
-        }
-
-        .summary-total {
-            display: flex;
-            justify-content: space-between;
-            padding: 1.5rem 0;
-            font-size: 1.3rem;
-            font-weight: bold;
-        }
-
-        .summary-total span:last-child {
-            color: var(--primary);
-            font-size: 1.5rem;
-        }
-
-        .delivery-info {
-            background: rgba(78, 205, 196, 0.1);
-            border: 1px solid rgba(78, 205, 196, 0.3);
-            border-radius: 12px;
-            padding: 1rem;
-            margin: 1rem 0;
-        }
-
-        .delivery-info-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .delivery-info-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .btn-full {
-            width: 100%;
-            padding: 1.2rem;
-            font-size: 1.1rem;
-        }
-
-        /* Footer */
-        footer {
-            position: relative;
-            z-index: 1;
-            background: rgba(26, 26, 46, 0.8);
-            backdrop-filter: blur(10px);
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 2rem 0;
-            text-align: center;
-        }
-
-        /* Toast */
-        #toast-container {
-            position: fixed;
-            top: 100px;
-            right: 20px;
-            z-index: 1000;
-        }
-
-        .toast {
-            background: linear-gradient(135deg, var(--success), var(--secondary));
-            color: white;
-            padding: 1rem 1.5rem;
-            border-radius: 12px;
-            margin-bottom: 1rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            animation: slideIn 0.4s, fadeOut 0.4s 2.6s forwards;
-        }
-
-        .toast.error {
-            background: linear-gradient(135deg, var(--danger), #ff6b81);
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(100px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        @keyframes fadeOut {
-            to {
-                opacity: 0;
-                transform: translateX(100px);
-            }
-        }
-
-        /* Responsive */
-        @media (max-width: 968px) {
-            .checkout-layout {
-                grid-template-columns: 1fr;
-            }
-
-            .payment-methods {
-                grid-template-columns: 1fr;
-            }
-
-            .nav-links {
-                display: none;
-            }
-
-            .checkout-progress {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-
-            .step-divider {
-                width: 2px;
-                height: 30px;
-            }
-        }
+        body { background-color: var(--bg-body, #fafafa); display: flex; flex-direction: column; min-height: 100vh; }
+        .checkout-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin: 2rem auto; max-width: 1200px; padding: 0 20px; }
+        .form-section, .order-summary { background: white; border: 1px solid var(--primary, #ff5722); border-radius: 20px; padding: 2rem; height: fit-content; }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; }
+        .form-group input, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 1rem; }
+        .summary-line { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        footer { margin-top: auto; padding: 2rem; text-align: center; background: #fff; border-top: 1px solid #eee; }
+        @media (max-width: 768px) { .checkout-layout { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
-    <!-- Animated Background -->
-    <div class="bg-animation">
-        <div class="bg-circle"></div>
-        <div class="bg-circle"></div>
-        <div class="bg-circle"></div>
-    </div>
 
-    <!-- Header -->
-    <header>
-        <div class="container navbar">
-            <a href="#" class="logo">🍔 Foodie Hub</a>
-            
-            <nav class="nav-links">
+    <nav id="navbar">
+        <div class="nav-container">
+            <a href="index.html" style="text-decoration: none"><div class="logo">🍔 Foodie Hub</div></a>
+            <div class="nav-links">
                 <a href="index.html">Home</a>
+                <a href="index.html#categories">Menu</a>
                 <a href="cart.html">Cart</a>
                 <a href="dashboard.html">Dashboard</a>
-            </nav>
-
-            <div class="header-buttons">
+            </div>
+            <div class="nav-cta">
                 <button class="btn btn-outline">Login</button>
                 <button class="btn btn-primary">Sign Up</button>
             </div>
         </div>
-    </header>
+    </nav>
 
     <main class="container">
-        <h1>🛍️ Checkout</h1>
-
-        <!-- Progress Steps -->
-        <div class="checkout-progress">
-            <div class="progress-step">
-                <div class="step-circle">✓</div>
-                <span class="step-label">Cart</span>
-            </div>
-            <div class="step-divider"></div>
-            <div class="progress-step">
-                <div class="step-circle active">2</div>
-                <span class="step-label active">Checkout</span>
-            </div>
-            <div class="step-divider"></div>
-            <div class="progress-step">
-                <div class="step-circle">3</div>
-                <span class="step-label">Confirmation</span>
-            </div>
-        </div>
+        <h1 style="text-align:center; margin-top:30px;">🛍️ Checkout</h1>
 
         <div class="checkout-layout">
-            <!-- Form Section -->
-            <div>
+            <div class="left-col">
                 <section class="form-section">
                     <h2>📍 Delivery Details</h2>
-                    <form id="checkout-form">
+                    <form id="checkout-form" style="margin-top: 1.5rem;">
                         <div class="form-group">
-                            <label for="full-name">Full Name *</label>
-                            <input type="text" id="full-name" placeholder="Enter your full name" required>
+                            <label>Full Name *</label>
+                            <input type="text" id="full-name" placeholder="John Doe" required>
                         </div>
                         <div class="form-group">
-                            <label for="phone-number">Phone Number *</label>
-                            <input type="tel" id="phone-number" placeholder="e.g., 077 123 4567" required>
+                            <label>Phone Number *</label>
+                            <input type="tel" id="phone-number" placeholder="077 123 4567" required>
                         </div>
                         <div class="form-group">
-                            <label for="delivery-address">Delivery Address *</label>
-                            <textarea id="delivery-address" rows="3" placeholder="Street address, apartment/unit number" required></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="special-instructions">Special Instructions (Optional)</label>
-                            <textarea id="special-instructions" rows="2" placeholder="e.g., Ring the doorbell, Leave at door"></textarea>
+                            <label>Address *</label>
+                            <textarea id="delivery-address" rows="3" placeholder="No 123, Galle Road, Colombo" required></textarea>
                         </div>
                     </form>
                 </section>
-
-                <section class="form-section" style="margin-top: 2rem;">
-                    <h2>💳 Payment Method</h2>
-                    <div class="payment-methods">
-                        <div class="payment-card selected" onclick="selectPayment('cod')">
-                            <div class="payment-icon">💵</div>
-                            <div class="payment-name">Cash on Delivery</div>
-                            <div class="payment-desc">Pay when you receive</div>
-                        </div>
-                        <div class="payment-card disabled">
-                            <div class="payment-icon">💳</div>
-                            <div class="payment-name">Credit Card</div>
-                            <div class="payment-desc">Coming Soon</div>
-                        </div>
-                        <div class="payment-card disabled">
-                            <div class="payment-icon">📱</div>
-                            <div class="payment-name">Digital Wallet</div>
-                            <div class="payment-desc">Coming Soon</div>
-                        </div>
-                    </div>
-                </section>
             </div>
 
-            <!-- Order Summary -->
             <aside class="order-summary">
                 <h2>Order Summary</h2>
-                
-                <div class="order-item">
-                    <div class="item-info">
-                        <div class="item-name">Quinoa Power Bowl</div>
-                        <div class="item-qty">Quantity: 1</div>
-                    </div>
-                    <div class="item-price">LKR 1,250</div>
-                </div>
-
-                <div class="order-item">
-                    <div class="item-info">
-                        <div class="item-name">Spicy Chicken Biryani</div>
-                        <div class="item-qty">Quantity: 2</div>
-                    </div>
-                    <div class="item-price">LKR 1,960</div>
-                </div>
-
-                <div class="summary-divider"></div>
-
+                <hr style="opacity: 0.1; margin: 1.5rem 0;">
+                <div id="order-items-list"></div>
+                <hr style="opacity: 0.1; margin: 1.5rem 0;">
                 <div class="summary-line">
                     <span>Subtotal</span>
-                    <span>LKR 3,210</span>
+                    <span id="subtotal">LKR 0</span>
                 </div>
                 <div class="summary-line">
                     <span>Delivery Fee</span>
                     <span>LKR 300</span>
                 </div>
-                <div class="summary-line">
-                    <span>Service Charge</span>
-                    <span>LKR 0</span>
-                </div>
-                
-                <div class="summary-total">
+                <div class="summary-line" style="font-weight:bold; font-size: 1.3rem; margin-top: 10px; color: var(--primary);">
                     <span>Total Amount</span>
-                    <span>LKR 3,510</span>
+                    <span id="grand-total">LKR 0</span>
                 </div>
-
-                <div class="delivery-info">
-                    <div class="delivery-info-item">
-                        <span>🕐</span>
-                        <span>Est. Delivery: 30-45 mins</span>
-                    </div>
-                    <div class="delivery-info-item">
-                        <span>📦</span>
-                        <span>3 items in order</span>
-                    </div>
-                    <div class="delivery-info-item">
-                        <span>✓</span>
-                        <span>Free delivery over LKR 3,000</span>
-                    </div>
-                </div>
-
-                <button class="btn btn-primary btn-full" onclick="placeOrder()">
-                    Place Order 🚀
-                </button>
+                <button class="btn btn-primary" style="width:100%; margin-top: 20px; padding: 15px;" onclick="placeOrder()">Place Order 🚀</button>
             </aside>
         </div>
     </main>
 
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <p>&copy; 2025 Foodie Hub. All rights reserved. Made with ❤️</p>
-        </div>
-    </footer>
-
-    <!-- Toast Container -->
-    <div id="toast-container"></div>
+    <footer><p>&copy; 2025 Foodie Hub. All rights reserved.</p></footer>
 
     <script>
-        let selectedPayment = 'cod';
-
-        function showToast(message, type = 'success') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.textContent = message;
-            container.appendChild(toast);
-
-            setTimeout(() => {
-                toast.remove();
-            }, 3000);
-        }
-
-        function selectPayment(method) {
-            if (method === 'cod') {
-                selectedPayment = method;
-                document.querySelectorAll('.payment-card').forEach(card => {
-                    card.classList.remove('selected');
-                });
-                event.currentTarget.classList.add('selected');
-                showToast('💵 Cash on Delivery selected');
-            } else {
-                showToast('This payment method is coming soon!', 'error');
-            }
-        }
-
-        function placeOrder() {
-            const form = document.getElementById('checkout-form');
-            const fullName = document.getElementById('full-name').value;
-            const phone = document.getElementById('phone-number').value;
-            const address = document.getElementById('delivery-address').value;
-
-            if (!fullName || !phone || !address) {
-                showToast('❌ Please fill in all required fields', 'error');
-                form.reportValidity();
-                return;
-            }
-
-            // Validate phone number (basic Sri Lankan format)
-            const phoneRegex = /^0\d{9}$/;
-            const cleanPhone = phone.replace(/\s/g, '');
-            if (!phoneRegex.test(cleanPhone)) {
-                showToast('❌ Please enter a valid phone number', 'error');
-                return;
-            }
-
-            // Success flow
-            showToast('🎉 Processing your order...');
-            
-            setTimeout(() => {
-                showToast('✅ Order placed successfully!');
-            }, 1500);
-
-            setTimeout(() => {
-                // Simulate redirect
-                alert(`🎉 Order Confirmed!
-
-Order ID: #FH-${Math.floor(1000 + Math.random() * 9000)}
-Name: ${fullName}
-Phone: ${phone}
-Address: ${address}
-Payment: Cash on Delivery
-Total: LKR 3,510
-
-Estimated delivery: 30-45 minutes
-
-Thank you for ordering from Foodie Hub! 🍔`);
-                
-                // In real app, would redirect to dashboard
-                // window.location.href = 'dashboard.html';
-            }, 3000);
-        }
-
-        // Auto-format phone number
-        document.getElementById('phone-number').addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\s/g, '');
-            if (value.length > 3 && value.length <= 6) {
-                e.target.value = value.slice(0, 3) + ' ' + value.slice(3);
-            } else if (value.length > 6) {
-                e.target.value = value.slice(0, 3) + ' ' + value.slice(3, 6) + ' ' + value.slice(6, 10);
-            }
-        });
-
-        // Form validation feedback
-        document.querySelectorAll('#checkout-form input, #checkout-form textarea').forEach(input => {
-            input.addEventListener('blur', function() {
-                if (this.required && !this.value) {
-                    this.style.borderColor = 'var(--danger)';
-                } else {
-                    this.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-                }
-            });
-
-            input.addEventListener('input', function() {
-                if (this.value) {
-                    this.style.borderColor = 'var(--success)';
-                }
-            });
-        });
+       
     </script>
 </body>
 </html>
