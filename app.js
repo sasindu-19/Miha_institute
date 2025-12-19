@@ -26,6 +26,7 @@ async function loginUser(){
 async function signupUser(){
     const firstName = document.getElementById("firstName").value;
     const lastName = document.getElementById("lastName").value;
+    const fullName = `${firstName} ${lastName}`;
     const email = document.getElementById("signupEmail").value;
     const phone = document.getElementById("phone").value;
     const password = document.getElementById("signupPassword").value;
@@ -44,6 +45,7 @@ async function signupUser(){
         await db.collection("users").doc(user.uid).set({
             firstName,
             lastName,
+            fullName: fullName,
             email,
             phone,
             role,
