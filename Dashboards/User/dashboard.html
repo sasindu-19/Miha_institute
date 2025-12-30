@@ -1,45 +1,189 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Foodie Hub - User Dashboard</title>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <script src="../../Firebase/firebaseConfig.js"></script>
-    <script src="user.js"></script>
-    <link rel="stylesheet" href="user.css"> 
+    <link rel="stylesheet" href="user.css">
     <style>
-        body { background-color: var(--bg-body, #fafafa); display: flex; flex-direction: column; min-height: 100vh; margin: 0; }
-        main { flex: 1; padding-bottom: 3rem; margin: 20px; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem; }
-        .stat-card { background: white; border: 1px solid var(--primary, #ff5722); border-radius: 20px; padding: 1.5rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .stat-value { font-size: 1.8rem; font-weight: bold; color: var(--primary); }
-        .dashboard-layout { display: grid; grid-template-columns: 280px 1fr; gap: 2rem; width: 100%; }
-        .dashboard-sidebar { background: white; border: 1px solid #eee; border-radius: 20px; padding: 2rem; height: fit-content; position: sticky; top: 100px; }
-        .user-avatar { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--primary); margin-bottom: 1rem; object-fit: cover; }
-        .tab-content { display: none; animation: fadeIn 0.4s ease-in-out; }
-        .tab-content.active { display: block; }
-        .sidebar-btn { text-align: left; width: 100%; padding: 12px 15px; margin-bottom: 8px; border: none; background: transparent; border-radius: 10px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 10px; transition: 0.3s; }
-        .sidebar-btn.active { background: var(--primary, #ff5722) !important; color: white !important; }
-        .sidebar-btn:hover:not(.active) { background: #f0f0f0; }
-        .order-card { background: white; border: 1px solid #eee; border-radius: 20px; padding: 1.5rem; margin-bottom: 1.2rem; }
-        .progress-bar-bg { width: 100%; height: 8px; background: #eee; border-radius: 10px; margin: 15px 0; overflow: hidden; }
-        .progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 1s ease-in-out; }
-        .form-group { margin-bottom: 1.2rem; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; }
-        .form-group input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; }
-        footer { padding: 2rem; text-align: center; background: #fff; border-top: 1px solid #eee; margin-top: auto; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        @media (max-width: 968px) { .dashboard-layout { grid-template-columns: 1fr; } .dashboard-sidebar { position: static; margin-bottom: 2rem; } }
+        body {
+            background-color: var(--bg-body, #fafafa);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        main {
+            flex: 1;
+            padding-bottom: 3rem;
+            margin: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .stat-card {
+            background: white;
+            border: 1px solid var(--primary, #ff5722);
+            border-radius: 20px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 2rem;
+            width: 100%;
+        }
+
+        .dashboard-sidebar {
+            background: white;
+            border: 1px solid #eee;
+            border-radius: 20px;
+            padding: 2rem;
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+        }
+
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid var(--primary);
+            margin-bottom: 1rem;
+            object-fit: cover;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .sidebar-btn {
+            text-align: left;
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            border: none;
+            background: transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: 0.3s;
+        }
+
+        .sidebar-btn.active {
+            background: var(--primary, #ff5722) !important;
+            color: white !important;
+        }
+
+        .sidebar-btn:hover:not(.active) {
+            background: #f0f0f0;
+        }
+
+        .order-card {
+            background: white;
+            border: 1px solid #eee;
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 8px;
+            background: #eee;
+            border-radius: 10px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 1s ease-in-out;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        footer {
+            padding: 2rem;
+            text-align: center;
+            background: #fff;
+            border-top: 1px solid #eee;
+            margin-top: auto;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 968px) {
+            .dashboard-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-sidebar {
+                position: static;
+                margin-bottom: 2rem;
+            }
+        }
     </style>
 </head>
+
 <body>
 
     <nav id="navbar">
         <div class="nav-container">
-            <a href="index.html" style="text-decoration: none"><div class="logo">🍔 Foodie Hub</div></a>
+            <a href="index.html" style="text-decoration: none">
+                <div class="logo">🍔 Foodie Hub</div>
+            </a>
             <div class="nav-links">
                 <a href="index.html">Home</a>
                 <a href="index.html#categories">Menu</a>
@@ -76,7 +220,8 @@
         <div class="dashboard-layout">
             <aside class="dashboard-sidebar">
                 <div style="text-align: center;">
-                    <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100" class="user-avatar" alt="User">
+                    <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100" class="user-avatar"
+                        alt="User">
                     <h3 id="display-name">Loading...</h3>
                     <p id="display-email-text" style="color:#666; font-size: 0.9rem;">Email Loading...</p>
                 </div>
@@ -120,15 +265,45 @@
                     <div class="order-card" style="display: flex; justify-content: space-between; align-items: center;">
                         <div>
                             <strong>Primary Delivery Address</strong>
-                            <p id="display-address" style="color:#666; font-size: 0.9rem; margin-top: 5px;">No address saved.</p>
+                            <p id="display-address" style="color:#666; font-size: 0.9rem; margin-top: 5px;">No address
+                                saved.</p>
                         </div>
                     </div>
-                    <button class="btn btn-outline" style="width:100%; border-style: dashed;" onclick="updateAddress()">+ Change Address</button>
+                    <button class="btn btn-outline" style="width:100%; border-style: dashed;"
+                        onclick="updateAddress()">+ Change Address</button>
                 </div>
             </section>
         </div>
     </main>
 
-    <footer><p>&copy; 2025 Foodie Hub. Made with ❤️</p></footer>
+    <footer>
+        <p>&copy; 2025 Foodie Hub. Made with ❤️</p>
+    </footer>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="../../Firebase/firebaseConfig.js"></script>
+    <script src="user.js"></script>
+
+    <script>
+        window.onload = function () {
+            // Check if user is logged in and is User
+            auth.onAuthStateChanged(async (user) => {
+                if (user) {
+                    try {
+                        const doc = await db.collection("users").doc(user.uid).get();
+                        if (!doc.exists || doc.data().role !== "user") {
+                            window.location.href = "../../index.html";
+                        }
+                    } catch (error) {
+                        window.location.href = "../../index.html";
+                    }
+                } else {
+                    window.location.href = "../../index.html";
+                }
+            });
+        };
+    </script>
 </body>
+
 </html>

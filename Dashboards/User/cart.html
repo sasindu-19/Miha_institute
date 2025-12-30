@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Foodie Hub - Your Cart</title>
-    <script src="user.js"></script>
-    <link rel="stylesheet" href="user.css"> 
+    <link rel="stylesheet" href="user.css">
     <style>
         body {
             background-color: var(--bg-body, #fafafa);
@@ -89,7 +89,7 @@
         }
 
         footer {
-            margin-top: auto; 
+            margin-top: auto;
             padding: 2rem 0;
             text-align: center;
             background: #fff;
@@ -97,15 +97,20 @@
         }
 
         @media (max-width: 768px) {
-            .cart-layout { grid-template-columns: 1fr; }
+            .cart-layout {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
+
 <body>
 
     <nav id="navbar">
         <div class="nav-container">
-            <a href="index.html" style="text-decoration: none"><div class="logo">🍔 Foodie Hub</div></a>
+            <a href="index.html" style="text-decoration: none">
+                <div class="logo">🍔 Foodie Hub</div>
+            </a>
             <div class="nav-links">
                 <a href="index.html">Home</a>
                 <a href="index.html#categories">Menu</a>
@@ -138,14 +143,18 @@
                     <span>Delivery</span>
                     <span id="delivery"></span>
                 </div>
-                <div class="summary-line" style="font-weight: bold; font-size: 1.2rem; border-top: 1px solid #eee; padding-top: 1rem; margin-top: 1rem;">
+                <div class="summary-line"
+                    style="font-weight: bold; font-size: 1.2rem; border-top: 1px solid #eee; padding-top: 1rem; margin-top: 1rem;">
                     <span>Total</span>
                     <span id="grand-total" style="color: var(--primary, #ff5722);"></span>
                 </div>
-                
-                <input type="text" id="promo-input" placeholder="Promo: FOODIE10" style="width: 100%; margin: 1rem 0; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box;">
-                <button class="btn btn-outline" onclick="applyPromo()" style="width: 100%; margin-bottom: 10px; cursor:pointer">Apply Promo</button>
-                <a href="checkout.html"><button class="btn btn-primary" style="width: 100%; cursor:pointer" onclick="checkout()">Proceed to Checkout</button></a>
+
+                <input type="text" id="promo-input" placeholder="Promo: FOODIE10"
+                    style="width: 100%; margin: 1rem 0; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box;">
+                <button class="btn btn-outline" onclick="applyPromo()"
+                    style="width: 100%; margin-bottom: 10px; cursor:pointer">Apply Promo</button>
+                <a href="checkout.html"><button class="btn btn-primary" style="width: 100%; cursor:pointer"
+                        onclick="checkout()">Proceed to Checkout</button></a>
             </aside>
         </div>
     </main>
@@ -155,8 +164,31 @@
     </footer>
 
     <div id="toast-container"></div>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="../../Firebase/firebaseConfig.js"></script>
+    <script src="user.js"></script>
+
+    <script>
+        window.onload = function () {
+            // Check if user is logged in and is User
+            auth.onAuthStateChanged(async (user) => {
+                if (user) {
+                    try {
+                        const doc = await db.collection("users").doc(user.uid).get();
+                        if (!doc.exists || doc.data().role !== "user") {
+                            window.location.href = "../../index.html";
+                        }
+                    } catch (error) {
+                        window.location.href = "../../index.html";
+                    }
+                } else {
+                    window.location.href = "../../index.html";
+                }
+            });
+        };
+    </script>
 </body>
+
 </html>
-
-
-                

@@ -1,25 +1,24 @@
 // ==========================================
 // 1. CLOUDINARY CONFIGURATION
 // ==========================================
-const CLOUD_NAME = "diaf824lc"; 
-const UPLOAD_PRESET = "vadvaxcz"; 
+const CLOUD_NAME = "diaf824lc";
+const UPLOAD_PRESET = "vadvaxcz";
 
-// Function to handle image upload
 async function uploadImageToCloudinary(file) {
-    console.log("1. Starting Upload Process...");
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("upload_preset", UPLOAD_PRESET); 
+    formData.append("upload_preset", UPLOAD_PRESET);
     formData.append("cloud_name", CLOUD_NAME);
 
     try {
         const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
-            method: "POST", body: formData
+            method: "POST",
+            body: formData
         });
         const data = await response.json();
-        
+
         if (data.error) {
-            alert("Upload Error: " + data.error.message); 
+            alert("Upload Error: " + data.error.message);
             return null;
         }
         return data.secure_url;
@@ -28,23 +27,23 @@ async function uploadImageToCloudinary(file) {
         return null;
     }
 }
+
 // ==========================================
 // 2. INITIALIZATION
 // ==========================================
 
-document.addEventListener('DOMContentLoaded', function() {
-    
+document.addEventListener('DOMContentLoaded', function () {
+    // Initial data load
     loadDashboardData();
     loadFoods();
     loadCategories();
 
     // --- FOOD FORM SUBMIT ---
     const foodForm = document.getElementById('foodForm');
-    
-    if(foodForm) {
+    if (foodForm) {
         foodForm.addEventListener('submit', async (e) => {
-            e.preventDefault(); 
-            
+            e.preventDefault();
+
             const submitBtn = document.querySelector('.btn-submit');
             const originalBtnText = submitBtn.textContent;
             submitBtn.disabled = true;
@@ -53,44 +52,38 @@ document.addEventListener('DOMContentLoaded', function() {
                 const fileInput = document.getElementById('itemImageInput');
                 let imageUrl = null;
 
-                if (!fileInput) {
-                    throw new Error("Critical: Image Input ID 'itemImageInput' not found!");
-                }
-
-                if (fileInput.files.length > 0) {
+                // Upload image if selected
+                if (fileInput && fileInput.files.length > 0) {
                     submitBtn.textContent = 'Uploading Image...';
                     imageUrl = await uploadImageToCloudinary(fileInput.files[0]);
-                    
-                    if(!imageUrl) {
-                        alert("Warning: Image upload failed. Saving without image.");
-                    }
                 }
+
                 submitBtn.textContent = 'Saving Data...';
-                
+
                 const radioElement = document.querySelector('input[name="availability"]:checked');
                 const availability = radioElement ? radioElement.value : 'available';
-                
+
                 let price = parseFloat(document.getElementById('foodPrice').value);
                 if (isNaN(price)) price = 0;
-            
+
                 const foodData = {
                     name: document.getElementById('foodName').value,
                     price: price,
                     description: document.getElementById('foodDescription').value,
                     category: document.getElementById('foodCategory').value,
-                    subcategory: document.getElementById('foodSubcategory').value || '', 
+                    subcategory: document.getElementById('foodSubcategory').value || '',
                     allergens: document.getElementById('foodAllergens').value || '',
                     availability: availability,
-                    image: imageUrl, 
+                    image: imageUrl,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 };
-            
+
                 await db.collection('foods').add(foodData);
                 alert('Food Added Successfully!');
-                closeFoodModal(); 
+                closeFoodModal();
 
             } catch (error) {
-                console.error("Error:", error);
+                console.error("Error adding food:", error);
                 alert("Error: " + error.message);
             } finally {
                 submitBtn.textContent = originalBtnText;
@@ -99,20 +92,18 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // --- Category Form Submit ---
+    // --- CATEGORY FORM SUBMIT ---
     const catForm = document.getElementById('categoryForm');
     if (catForm) {
         catForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const categoryData = {
                 name: document.getElementById('categoryName').value,
-                itemsCount: 0,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             };
             try {
                 await db.collection('categories').add(categoryData);
                 alert('Category Added!');
-                document.getElementById('categoryName').value = "";
                 closeCategoryModal();
             } catch (error) {
                 alert("Error adding category");
@@ -123,12 +114,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- NAVIGATION LOGIC ---
     const menuItems = document.querySelectorAll('.menu-item');
     menuItems.forEach(item => {
-        item.addEventListener('click', function() {
+        item.addEventListener('click', function () {
             menuItems.forEach(m => m.classList.remove('active'));
             this.classList.add('active');
+
             const section = this.dataset.section;
             document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
             document.getElementById(section).classList.add('active');
+
             if (section === 'foods') loadFoods();
             if (section === 'orders') loadOrders();
             if (section === 'categories') loadCategories();
@@ -141,29 +134,45 @@ document.addEventListener('DOMContentLoaded', function() {
 // ==========================================
 
 function loadDashboardData() {
-    if(!db) return;
+    if (!db) return;
+
+    // Real-time count for Foods
     db.collection('foods').onSnapshot(snap => {
         const el = document.getElementById('totalFoods');
-        if(el) el.textContent = snap.size;
+        if (el) el.textContent = snap.size;
     });
 
+    // Real-time updates for Orders, Pending count, and Revenue
     db.collection('orders').onSnapshot(snap => {
         const elTotal = document.getElementById('totalOrders');
         const elPending = document.getElementById('pendingOrders');
         const elRev = document.getElementById('totalRevenue');
 
-        if(elTotal) elTotal.textContent = snap.size;
+        if (elTotal) elTotal.textContent = snap.size;
 
-        let pending = 0;
-        let revenue = 0;
+        let pendingCount = 0;
+        let totalRevenue = 0;
+
         snap.forEach(doc => {
             const order = doc.data();
-            if(order.status === 'pending') pending++;
-            revenue += (order.totalAmount || order.total || 0);
+
+            if (order.status && order.status.toLowerCase() === 'pending') {
+                pendingCount++;
+            }
+
+            let rawPrice = order.subtotal || order.total || order.totalAmount || "0";
+            let numericValue = 0;
+
+            if (typeof rawPrice === 'string') {
+                numericValue = parseFloat(rawPrice.replace(/[^0-9.]/g, '')) || 0;
+            } else {
+                numericValue = parseFloat(rawPrice) || 0;
+            }
+            totalRevenue += numericValue;
         });
 
-        if (elPending) elPending.textContent = pending;
-        if (elRev) elRev.textContent = "Rs. " + revenue.toFixed(2);
+        if (elPending) elPending.textContent = pendingCount;
+        if (elRev) elRev.textContent = "Rs. " + totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 });
     });
 }
 
@@ -175,7 +184,7 @@ function loadFoods() {
     const grid = document.getElementById('foodGrid');
     if (!grid) return;
 
-    db.collection('foods').onSnapshot(snap => {
+    db.collection('foods').orderBy('createdAt', 'desc').onSnapshot(snap => {
         grid.innerHTML = '';
         snap.forEach(doc => {
             const food = doc.data();
@@ -208,160 +217,191 @@ function loadFoods() {
     });
 }
 
-// ======================
+// ==========================================
 // 5. ORDER MANAGEMENT 
-// ======================
-
+// ==========================================
 async function loadOrders() {
+    const tbody = document.getElementById('ordersTableBody');
+    if (!tbody) return;
+
     try {
-        const snapshot = await db.collection('orders').orderBy('createdAt', 'desc').get();
-        const tbody = document.getElementById('ordersTableBody');
-        if(!tbody) return;
-        
+        const snapshot = await db.collection('orders').get();
         tbody.innerHTML = '';
-        
+
         snapshot.forEach(doc => {
             const order = doc.data();
-            const statusClass = `status-${order.status || 'pending'}`;
-            const row = `
+            const displayTotal = order.subtotal || order.total || order.totalAmount || 'Rs. 0';
+            const currentStatus = order.status || 'Pending';
+            const statusClass = `status-${currentStatus.toLowerCase().replace(/\s+/g, '-')}`;
+
+            const statusOptions = ['Pending', 'Preparing', 'Out for Delivery', 'Delivered'];
+            let statusDropdown = `<select class="status-select" onchange="updateOrderStatus('${doc.id}', this.value)">`;
+            statusOptions.forEach(opt => {
+                statusDropdown += `<option value="${opt}" ${currentStatus === opt ? 'selected' : ''}>${opt}</option>`;
+            });
+            statusDropdown += `</select>`;
+
+            tbody.innerHTML += `
                 <tr>
                     <td>#${doc.id.substring(0, 6)}</td>
-                    <td>${order.customerName || 'N/A'}</td>
-                    <td>${order.items?.length || 0} items</td>
-                    <td>Rs. ${order.total || 0}</td>
-                    <td><span class="status-badge ${statusClass}">${order.status || 'pending'}</span></td>
+                    <td>${order.customerName || 'Guest'}</td>
+                    <td>${order.items ? (Array.isArray(order.items) ? order.items.length : '1') : 0} items</td>
+                    <td>${displayTotal}</td>
+                    <td><span class="status-badge ${statusClass}">${currentStatus}</span></td>
                     <td class="action-btns">
-                        <button class="btn-edit" onclick="updateOrderStatus('${doc.id}')">Update</button>
+                        <button class="edit-text" onclick="viewOrder('${doc.id}')">View</button>
+                        ${statusDropdown}
                     </td>
                 </tr>
             `;
-            tbody.innerHTML += row;
         });
     } catch (error) {
         console.error('Error loading orders:', error);
     }
 }
 
+// --- Function to View Specific Order Details ---
+window.viewOrder = async function (docId) {
+    const modal = document.getElementById('orderViewModal');
+    const content = document.getElementById('orderDetailsContent');
+    modal.classList.add('active');
+    content.innerHTML = '<p>Loading order details...</p>';
+
+    try {
+        const doc = await db.collection('orders').doc(docId).get();
+        if (!doc.exists) {
+            content.innerHTML = '<p>Order not found.</p>';
+            return;
+        }
+
+        const order = doc.data();
+        let itemsHtml = '';
+
+        // Loop through items array if it exists
+        if (order.items && Array.isArray(order.items)) {
+            order.items.forEach(item => {
+                itemsHtml += `
+                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding: 8px 0;">
+                        <span>${item.name} x ${item.quantity || 1}</span>
+                        <span>Rs. ${item.price}</span>
+                    </div>`;
+            });
+        }
+
+        content.innerHTML = `
+            <div class="order-detail-card">
+                <p><strong>Order ID:</strong> #${docId}</p>
+                <p><strong>Customer:</strong> ${order.customerName || 'N/A'}</p>
+                <p><strong>Phone:</strong> ${order.customerPhone || 'N/A'}</p>
+                <p><strong>Address:</strong> ${order.address || 'N/A'}</p>
+                <hr>
+                <h4>Items:</h4>
+                ${itemsHtml || '<p>No items found</p>'}
+                <hr>
+                <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 1.1rem; margin-top: 10px;">
+                    <span>Total Amount:</span>
+                    <span>${order.subtotal || order.total || order.totalAmount}</span>
+                </div>
+            </div>
+        `;
+    } catch (error) {
+        content.innerHTML = '<p>Error loading details.</p>';
+        console.error(error);
+    }
+};
+
+window.closeOrderModal = function () {
+    document.getElementById('orderViewModal').classList.remove('active');
+};
+
+window.updateOrderStatus = async function (docId, newStatus) {
+    try {
+        await db.collection('orders').doc(docId).update({ status: newStatus });
+        loadOrders();
+    } catch (error) {
+        console.error("Update failed:", error);
+        alert("Failed to update status.");
+    }
+};
+
 // ==========================================
 // 6. CATEGORY MANAGEMENT
 // ==========================================
 
-let liveCategories= [];
+let liveCategories = [];
 let liveFoods = [];
 
 function loadCategories() {
-    const tbody = document.getElementById('categoriesTableBody');
-    if (!tbody) return;
-
     db.collection('categories').onSnapshot(snapshot => {
-        liveCategories = snapshot.docs.map(doc =>({
-            id: doc.id,
-            ...doc.data()
-        }));
+        liveCategories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         renderCategoriesTable();
     });
 
     db.collection('foods').onSnapshot(snapshot => {
-        liveFoods = snapshot.docs.map(doc =>({
-            id: doc.id,
-            ...doc.data()
-        }));
+        liveFoods = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         renderCategoriesTable();
     });
 }
 
-function renderCategoriesTable(){
+function renderCategoriesTable() {
     const tbody = document.getElementById('categoriesTableBody');
     if (!tbody) return;
-
     tbody.innerHTML = '';
 
     liveCategories.forEach(cat => {
         const itemCount = liveFoods.filter(food => food.category === cat.name).length;
-        const row =`
+        tbody.innerHTML += `
             <tr>
                 <td>${cat.name}</td>
-
                 <td style="font-weight: bold; color: #2ecc71">${itemCount} Items</td>
-
                 <td class="action-btns">
                     <button class="btn-delete" onclick="deleteCategory('${cat.id}')">Delete</button>
                 </td>
             </tr>
         `;
-        tbody.innerHTML += row;
     });
 }
+
 // ==========================================
-// 7. GLOBAL WINDOW FUNCTIONS
+// 7. GLOBAL HELPERS & MODALS
 // ==========================================
 
-window.deleteFood = async function(id) {
-    if (confirm('Delete this item?')) {
-        await db.collection('foods').doc(id).delete();
-    }
+window.deleteFood = async function (id) {
+    if (confirm('Delete this item?')) await db.collection('foods').doc(id).delete();
 };
 
-window.editFood = function(id) {
-    alert("Edit feature coming soon!"); 
+window.editFood = (id) => alert("Edit feature coming soon!");
+
+window.deleteCategory = async function (id) {
+    if (confirm('Delete this category?')) await db.collection('categories').doc(id).delete();
 };
 
-window.deleteCategory = async function(id) {
-    if (confirm('Delete this category?')) {
-        await db.collection('categories').doc(id).delete();
-    }
-};
-
-window.updateOrderStatus = async function(orderId) {
-    const newStatus = prompt('Enter new status (pending/preparing/ready):');
-    if (newStatus && ['pending', 'preparing', 'ready'].includes(newStatus)) {
-        await db.collection('orders').doc(orderId).update({ status: newStatus });
-        alert('Status Updated!');
-        loadOrders();
-    }
-};
-
-window.handleLogout = function() {
+window.handleLogout = function () {
     if (confirm('Logout?')) {
-        auth.signOut().then(() => {
-            window.location.href = '../../index.html';
-        });
+        auth.signOut().then(() => window.location.href = '../../index.html');
     }
 };
 
-// Modal Helpers
-window.openFoodModal = function() {
+window.openFoodModal = function () {
     const select = document.getElementById('foodCategory');
-    if(select) {
+    if (select) {
         db.collection("categories").get().then(snap => {
             select.innerHTML = '<option value="">Select Category</option>';
             snap.forEach(doc => {
                 const opt = document.createElement('option');
-                opt.value = doc.data().name; 
-                opt.text = doc.data().name; 
+                opt.value = doc.data().name;
+                opt.text = doc.data().name;
                 select.appendChild(opt);
             });
         });
     }
     document.getElementById('foodModal').classList.add('active');
-    document.getElementById('foodForm').reset();
 };
 
-window.closeFoodModal = function() {
+window.closeFoodModal = function () {
     document.getElementById('foodModal').classList.remove('active');
     document.getElementById('foodForm').reset();
-    const box = document.querySelector('.image-upload-box');
-    if(box) {
-        box.style.backgroundImage = 'none';
-        box.innerHTML = '<span style="font-size: 24px;">☁️</span><p>Click to upload image</p>';
-    }
 };
 
-window.openCategoryModal = function() {
-    document.getElementById('categoryModal').classList.add('active');
-    document.getElementById('categoryForm').reset();
-};
-
-window.closeCategoryModal = function() {
-    document.getElementById('categoryModal').classList.remove('active');
-};
+window.openCategoryModal = () => document.getElementById('categoryModal').classList.add('active');
+window.closeCategoryModal = () => document.getElementById('categoryModal').classList.remove('active');

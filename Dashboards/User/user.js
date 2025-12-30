@@ -285,6 +285,7 @@ async function updateAddress() {
     }
 }
 
+//load dashboard Data
 function loadUserOrders(uid) {
     const orderList = document.getElementById('orders-list');
 

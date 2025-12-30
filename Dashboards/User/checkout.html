@@ -1,33 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Foodie Hub - Checkout</title>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <script src="../../Firebase/firebaseConfig.js"></script>
-    <script src="user.js"></script>
-    <link rel="stylesheet" href="user.css"> 
+    <link rel="stylesheet" href="user.css">
 
     <style>
-        body { background-color: var(--bg-body, #fafafa); display: flex; flex-direction: column; min-height: 100vh; }
-        .checkout-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin: 2rem auto; max-width: 1200px; padding: 0 20px; }
-        .form-section, .order-summary { background: white; border: 1px solid var(--primary, #ff5722); border-radius: 20px; padding: 2rem; height: fit-content; }
-        .form-group { margin-bottom: 1.5rem; }
-        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; }
-        .form-group input, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 1rem; }
-        .summary-line { display: flex; justify-content: space-between; margin-bottom: 10px; }
-        footer { margin-top: auto; padding: 2rem; text-align: center; background: #fff; border-top: 1px solid #eee; }
-        @media (max-width: 768px) { .checkout-layout { grid-template-columns: 1fr; } }
+        body {
+            background-color: var(--bg-body, #fafafa);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .checkout-layout {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin: 2rem auto;
+            max-width: 1200px;
+            padding: 0 20px;
+        }
+
+        .form-section,
+        .order-summary {
+            background: white;
+            border: 1px solid var(--primary, #ff5722);
+            border-radius: 20px;
+            padding: 2rem;
+            height: fit-content;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 1rem;
+        }
+
+        .summary-line {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        footer {
+            margin-top: auto;
+            padding: 2rem;
+            text-align: center;
+            background: #fff;
+            border-top: 1px solid #eee;
+        }
+
+        @media (max-width: 768px) {
+            .checkout-layout {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
+
 <body>
 
     <nav id="navbar">
         <div class="nav-container">
-            <a href="index.html" style="text-decoration: none"><div class="logo">🍔 Foodie Hub</div></a>
+            <a href="index.html" style="text-decoration: none">
+                <div class="logo">🍔 Foodie Hub</div>
+            </a>
             <div class="nav-links">
                 <a href="index.html">Home</a>
                 <a href="index.html#categories">Menu</a>
@@ -59,7 +112,8 @@
                         </div>
                         <div class="form-group">
                             <label>Address *</label>
-                            <textarea id="delivery-address" rows="3" placeholder="No 123, Galle Road, Colombo" required></textarea>
+                            <textarea id="delivery-address" rows="3" placeholder="No 123, Galle Road, Colombo"
+                                required></textarea>
                         </div>
                     </form>
                 </section>
@@ -78,19 +132,45 @@
                     <span>Delivery Fee</span>
                     <span>LKR 300</span>
                 </div>
-                <div class="summary-line" style="font-weight:bold; font-size: 1.3rem; margin-top: 10px; color: var(--primary);">
+                <div class="summary-line"
+                    style="font-weight:bold; font-size: 1.3rem; margin-top: 10px; color: var(--primary);">
                     <span>Total Amount</span>
                     <span id="grand-total">LKR 0</span>
                 </div>
-                <button class="btn btn-primary" style="width:100%; margin-top: 20px; padding: 15px;" onclick="placeOrder()">Place Order 🚀</button>
+                <button class="btn btn-primary" style="width:100%; margin-top: 20px; padding: 15px;"
+                    onclick="placeOrder()">Place Order 🚀</button>
             </aside>
         </div>
     </main>
 
-    <footer><p>&copy; 2025 Foodie Hub. All rights reserved.</p></footer>
+    <footer>
+        <p>&copy; 2025 Foodie Hub. All rights reserved.</p>
+    </footer>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="../../Firebase/firebaseConfig.js"></script>
+    <script src="user.js"></script>
 
     <script>
-       
+        window.onload = function () {
+            // Check if user is logged in and is User
+            auth.onAuthStateChanged(async (user) => {
+                if (user) {
+                    try {
+                        const doc = await db.collection("users").doc(user.uid).get();
+                        if (!doc.exists || doc.data().role !== "user") {
+                            window.location.href = "../../index.html";
+                        }
+                    } catch (error) {
+                        window.location.href = "../../index.html";
+                    }
+                } else {
+                    window.location.href = "../../index.html";
+                }
+            });
+        };
     </script>
 </body>
+
 </html>

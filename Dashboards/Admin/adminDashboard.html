@@ -1,37 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
     <link rel="stylesheet" href="admin.css">
-
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <script src="../../Firebase/firebaseConfig.js"></script>
-    <script src="admin.js"></script>
-
-    <script>
-        window.onload = function () {
-            // Check if user is logged in and is Admin
-            auth.onAuthStateChanged(async (user) => {
-                if (user) {
-                    try {
-                        const doc = await db.collection("users").doc(user.uid).get();
-                        if (!doc.exists || doc.data().role !== "admin") {
-                            window.location.href = "../../index.html";
-                        }
-                    } catch (error) {
-                        window.location.href = "../../index.html";
-                    }
-                } else {
-                    window.location.href = "../../index.html";
-                }
-            });
-        };
-    </script>
 </head>
+
 <body>
     <div class="dashboard-container">
         <div class="sidebar">
@@ -96,8 +72,23 @@
                             </tr>
                         </thead>
                         <tbody id="ordersTableBody">
-                            </tbody>
+                        </tbody>
                     </table>
+                </div>
+            </div>
+
+            <div class="modal" id="orderViewModal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Order Details</h2>
+                        <button class="close-btn" onclick="closeOrderModal()">&times;</button>
+                    </div>
+                    <div id="orderDetailsContent">
+                        <p>Loading details...</p>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-submit" onclick="closeOrderModal()">Close</button>
+                    </div>
                 </div>
             </div>
 
@@ -116,7 +107,7 @@
                             </tr>
                         </thead>
                         <tbody id="categoriesTableBody">
-                            </tbody>
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -132,7 +123,7 @@
                     <div class="form-group">
                         <label>Item Image</label>
                         <div class="image-upload-box" onclick="document.getElementById('itemImageInput').click()">
-                            <span style="font-size: 24px; color: #888;">☁️</span> 
+                            <span style="font-size: 24px; color: #888;">☁️</span>
                             <p>Click to upload image</p>
                             <input type="file" id="itemImageInput" accept="image/*" style="display: none;">
                         </div>
@@ -171,8 +162,10 @@
                         <div class="form-group half-width">
                             <label>Availability</label>
                             <div class="radio-group">
-                                <label><input type="radio" name="availability" value="available" checked> Available</label>
-                                <label><input type="radio" name="availability" value="unavailable"> Unavailable</label>
+                                <label><input type="radio" name="availability" value="available" checked>
+                                    Available</label>
+                                <label><input type="radio" name="availability" value="unavailable">
+                                    Unavailable</label>
                             </div>
                         </div>
                     </div>
@@ -203,5 +196,33 @@
             </div>
         </div>
     </div>
+
+    <!-- Firebase SDKs  -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <script src="../../Firebase/firebaseConfig.js"></script>
+    <script src="admin.js"></script>
+    <script>
+        window.onload = function () {
+            // Check if user is logged in and is Admin
+            auth.onAuthStateChanged(async (user) => {
+                if (user) {
+                    try {
+                        const doc = await db.collection("users").doc(user.uid).get();
+                        if (!doc.exists || doc.data().role !== "admin") {
+                            window.location.href = "../../index.html";
+                        }
+                    } catch (error) {
+                        window.location.href = "../../index.html";
+                    }
+                } else {
+                    window.location.href = "../../index.html";
+                }
+            });
+        };
+    </script>
 </body>
+
 </html>
