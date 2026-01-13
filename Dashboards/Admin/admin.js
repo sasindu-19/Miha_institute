@@ -277,7 +277,6 @@ window.viewOrder = async function (docId) {
         const order = doc.data();
         let itemsHtml = '';
 
-        // Loop through items array if it exists
         if (order.items && Array.isArray(order.items)) {
             order.items.forEach(item => {
                 itemsHtml += `

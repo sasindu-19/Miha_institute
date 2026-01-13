@@ -149,32 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
     displayCart();
 });
 
-//Checkout Page load summary 
-document.addEventListener('DOMContentLoaded',()=>{
-    const cart = JSON.parse(sessionStorage.getItem('foodieCart')) || [];
-    const orderList = document.getElementById('order-items-list');
-    const subtotalEl = document.getElementById('subtotal');
-    const grandTotalEl = document.getElementById('grand-total');
-
-    if(!orderList || !subtotalEl || !grandTotalEl) return;
-
-    let subtotal = 0;
-    orderList.innerHTML = '';
-
-    cart.forEach(item => {
-        subtotal +=item.price * item.qty;
-        orderList.innerHTML +=`
-        <div class="summary-line">
-            <span>${item.name} (x${item.qty})</span>
-            <span>LKR ${(item.price * item.qty).toLocaleString()}</span>
-        </div>`;
-    });
-    const delivery = subtotal > 0 ? 300 : 0;
-    subtotalEl.innerText = `LKR ${subtotal.toLocaleString()}`;
-    grandTotalEl.innerText = `LKR ${(subtotal+delivery).toLocaleString()}`;
-});
-
-//place Order To Firebase
+//Place Order
 async function placeOrder(){
     const user = auth.currentUser;
     if(!user){
@@ -182,37 +157,55 @@ async function placeOrder(){
         return;
     }
 
-    const name= document.getElementById('full-name').value;
-    const phone= document.getElementById('phone-number').value;
-    const address= document.getElementById('delivery-address').value;
-    const cart= JSON.parse(sessionStorage.getItem('foodieCart')) || [];
+    const name = document.getElementById('full-name').value.trim();
+    const phone = document.getElementById('phone-number').value.trim();
+    const address = document.getElementById('delivery-address').value.trim();
+    const cart = JSON.parse(sessionStorage.getItem('foodieCart')) || [];
+    
     if(!name || !phone || !address || cart.length === 0){
-
         alert("Please fill all details and ensure cart is not empty! ❌");
         return;
     }
 
-    const orderDate = {
+    let itemsTotal = 0;
+    
+
+    const processedItems = cart.map(item => {
+        const itemPrice = parseFloat(item.price);
+        const itemQty = parseInt(item.qty);
+        itemsTotal += itemPrice * itemQty;
+        return { ...item, price: itemPrice, qty: itemQty };
+    });
+
+    const deliveryFee = 300; 
+    const grandTotal = itemsTotal + deliveryFee; 
+
+    const orderData = {
         userId: user.uid,
         customerName: name,
         phone: phone,
         address: address,
-        items: cart,
-        subtotal:document.getElementById('subtotal').innerText,
+        items: processedItems,
+        
+        subtotal: `LKR ${grandTotal}`, 
+        
+        deliveryFee: `LKR ${deliveryFee}`, 
+        total: `LKR ${grandTotal}`, 
+        
         status: "Pending",
         createAt: firebase.firestore.FieldValue.serverTimestamp()
     };
+    
     try {
-        await db.collection("orders").add(orderDate);
+        await db.collection("orders").add(orderData);
         sessionStorage.removeItem('foodieCart');
-        alert("Order Placed Successfully!");
+        alert(`Order Placed Successfully! ✅`);
         window.location.href = "dashboard.html";
     } catch (error) {
         console.error("Firestore Error:", error);
         alert("Error: " + error.message);
     }
 }
-
 //----------------Dashboard Section----------------
 //Tab Switching
 function switchTab(event,tabId){
@@ -300,8 +293,8 @@ function loadUserOrders(uid) {
         }
 
         const sortedDocs = querySnapshot.docs.sort((a, b) => {
-            const dateA = a.data().createdAt ? a.data().createdAt.toMillis() : 0;
-            const dateB = b.data().createdAt ? b.data().createdAt.toMillis() : 0;
+            const dateA = a.data().createAt ? a.data().createAt.toMillis() : 0;
+            const dateB = b.data().createAt ? b.data().createAt.toMillis() : 0;
             return dateB - dateA;
         });
 
@@ -312,10 +305,16 @@ function loadUserOrders(uid) {
         sortedDocs.forEach((doc) => {
             const order = doc.data();
             const orderId = doc.id.slice(-6).toUpperCase();
-            const priceNum = parseInt((order.subtotal || "0").replace(/[^0-9]/g, '')) || 0;
+            
+            let rawPrice = order.total || order.subtotal || "0";
+
+            let cleanString = rawPrice.toString().replace(/[^\d.]/g, ''); 
+            
+            let priceNum = parseFloat(cleanString) || 0;
             
             totalSpent += priceNum;
-            if (order.status !== "Delivered") pendingCount++;
+
+            if (order.status !== "Delivered" && order.status !== "Cancelled") pendingCount++; 
 
             let progress = "20%";
             if (order.status === "Preparing") progress = "40%";
@@ -334,11 +333,12 @@ function loadUserOrders(uid) {
                     <p style="color: #444; font-size: 0.9rem;">
                         ${order.items ? order.items.map(item => `${item.name} x${item.qty}`).join(', ') : 'No items'}
                     </p>
-                    <div style="font-weight: bold; color: #ff5722;">${order.subtotal || 'LKR 0'}</div>
+                    <div style="font-weight: bold; color: #ff5722;">${order.total || order.subtotal || 'LKR 0'}</div>
                 </div>`;
         });
 
         orderList.innerHTML = ordersHTML;
+        
         updateStats(querySnapshot.size, pendingCount, totalSpent);
 
     }, (error) => { 
