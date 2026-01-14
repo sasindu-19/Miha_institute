@@ -14,7 +14,7 @@ async function loginUser(){
         const role = doc.data().role;
 
         if(role == "admin"){
-            window.location.href = "Dashboards/admin/adminDashboard.html";
+            window.location.href = "Dashboards/Admin/adminDashboard.html";
         }else{
             window.location.href = "Dashboards/User/index.html";
         }
