@@ -129,7 +129,7 @@ function removeItem(index) {
 
 function updateSummary() {
     const subtotalEl = document.getElementById('subtotal');
-    if (!subtotalEl) return;
+    if (!subtotalEl) return; 
 
     const cart = JSON.parse(sessionStorage.getItem('foodieCart')) || [];
     let subtotal = 0;
@@ -139,14 +139,28 @@ function updateSummary() {
     const total = subtotal + deliveryFee;
 
     subtotalEl.textContent = `LKR ${subtotal.toLocaleString()}`;
-    document.getElementById('delivery').textContent = `LKR ${deliveryFee.toLocaleString()}`;
-    document.getElementById('grand-total').textContent = `LKR ${total.toLocaleString()}`;
+    
+    const deliveryEl = document.getElementById('delivery');
+    if(deliveryEl) deliveryEl.textContent = `LKR ${deliveryFee.toLocaleString()}`;
+    
+    const grandTotalEl = document.getElementById('grand-total');
+    if(grandTotalEl) grandTotalEl.textContent = `LKR ${total.toLocaleString()}`;
 }
 
 // Initial Loads
 document.addEventListener('DOMContentLoaded', () => {
-    loadMenuItems('all');
-    displayCart();
+    
+    const menuGrid = document.getElementById('menu-grid');
+    if (menuGrid) {
+        loadMenuItems('all');
+    }
+    
+    const cartSection = document.getElementById('cart-items-section');
+    if (cartSection) {
+        displayCart();
+    }
+    
+    updateSummary(); 
 });
 
 //Place Order
@@ -226,23 +240,38 @@ function switchTab(event,tabId){
         }
     });
 //Load User Data
-async function loadUserProfile(uid){
+async function loadUserProfile(uid) {
     try {
         const userDoc = await db.collection("users").doc(uid).get();
-        if(userDoc.exists){
+        if (userDoc.exists) {
             const data = userDoc.data();
-            //update UI elements
-            document.getElementById('display-name').innerHTML = data.fullName || "User";
-            document.getElementById('display-email-text').innerHTML = auth.currentUser.email;
-            document.getElementById('display-address').innerHTML = data.address || "No address found";
+            
+            const displayNameEl = document.getElementById('display-name');
+            const displayEmailEl = document.getElementById('display-email-text');
+            const displayAddressEl = document.getElementById('display-address');
+            
+            if (displayNameEl) displayNameEl.innerHTML = data.fullName || "User";
+            if (displayEmailEl) displayEmailEl.innerHTML = auth.currentUser.email;
+            if (displayAddressEl) displayAddressEl.innerHTML = data.address || "No address found";
 
-            //Update Input fields
-            document.getElementById('input-name').value = data.fullName || "";
-            document.getElementById('input-phone').value = data.phone || "";
-            document.getElementById('input-email').value = auth.currentUser.email;
+            const inputName = document.getElementById('input-name');
+            const inputPhone = document.getElementById('input-phone');
+            const inputEmail = document.getElementById('input-email');
+
+            if (inputName) inputName.value = data.fullName || "";
+            if (inputPhone) inputPhone.value = data.phone || "";
+            if (inputEmail) inputEmail.value = auth.currentUser.email;
+            
+            const checkoutName = document.getElementById('full-name');
+            const checkoutPhone = document.getElementById('phone-number');
+            const checkoutAddress = document.getElementById('delivery-address');
+
+            if(checkoutName && !checkoutName.value) checkoutName.value = data.fullName || "";
+            if(checkoutPhone && !checkoutPhone.value) checkoutPhone.value = data.phone || "";
+            if(checkoutAddress && !checkoutAddress.value) checkoutAddress.value = data.address || "";
         }
     } catch (error) {
-        console.log("Error loading profile:",error);       
+        console.log("Error loading profile:", error);
     }
 }
 
